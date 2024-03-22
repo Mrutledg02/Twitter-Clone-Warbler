@@ -26,7 +26,7 @@ from app import app, CURR_USER_KEY
 # once for all tests --- in each test, we'll delete the data
 # and create fresh new clean test data
 
-db.create_all()
+
 
 # Don't have WTForms use CSRF at all, since it's a pain to test
 
@@ -38,6 +38,8 @@ class MessageViewTestCase(TestCase):
 
     def setUp(self):
         """Create test client, add sample data."""
+        db.drop_all()
+        db.create_all()
 
         User.query.delete()
         Message.query.delete()
@@ -50,6 +52,10 @@ class MessageViewTestCase(TestCase):
                                     image_url=None)
 
         db.session.commit()
+
+    def tearDown(self):
+        """Clean up any fouled transactions."""
+        db.session.rollback()
 
     def test_add_message(self):
         """Can use add a message?"""
@@ -71,3 +77,69 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+
+    def test_delete_message_logged_in(self):
+        """Test deleting a message when logged in."""
+        # Create a test message
+        msg = Message(text="Test message", user_id=self.testuser.id)
+        db.session.add(msg)
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            # Send a POST request to delete the message
+            resp = c.post(f"/messages/{msg.id}/delete")
+            self.assertEqual(resp.status_code, 302)
+
+            # Check if the message is deleted from the database
+            deleted_msg = Message.query.get(msg.id)
+            self.assertIsNone(deleted_msg)
+
+    def test_add_message_logged_out(self):
+        """Test prohibiting adding a message when logged out."""
+        with self.client as c:
+            resp = c.post("/messages/new", data={"text": "Test message"}, follow_redirects=True)
+            self.assertIn(b"Access unauthorized", resp.data)
+
+    def test_delete_message_logged_out(self):
+        """Test prohibiting deleting a message when logged out."""
+        # Create a test message
+        msg = Message(text="Test message", user_id=self.testuser.id)
+        db.session.add(msg)
+        db.session.commit()
+
+        with self.client as c:
+            resp = c.post(f"/messages/{msg.id}/delete", follow_redirects=True)
+            self.assertIn(b"Access unauthorized", resp.data)
+
+    def test_add_message_as_another_user(self):
+        with app.test_client() as client:
+            # Simulate an unauthorized user by not setting g.user
+            with client.session_transaction() as session:
+                session.clear()
+
+            # Send a POST request to the message adding endpoint
+            response = client.post('/messages/new', data={'text': 'Test message'}, follow_redirects=True)
+
+            # Check if the response at the redirected URL contains the "Access unauthorized" message
+            self.assertIn(b"Access unauthorized", response.data)
+
+    def test_delete_message_as_another_user(self):
+        """Test prohibiting deleting a message as another user."""
+        with app.test_client() as client:
+            # Simulate an unauthorized user by not setting g.user
+            with client.session_transaction() as session:
+                session.clear()
+
+            # Create a test message by the test user
+            msg = Message(text="Test message", user_id=self.testuser.id)
+            db.session.add(msg)
+            db.session.commit()
+
+            # Send a POST request to delete the message
+            response = client.post(f"/messages/{msg.id}/delete", follow_redirects=True)
+
+            # Check if the response at the redirected URL contains the "Access unauthorized" message
+            self.assertIn(b"Access unauthorized", response.data)

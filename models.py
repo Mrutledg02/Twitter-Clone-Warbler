@@ -1,8 +1,8 @@
 """SQLAlchemy models for Warbler."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
-from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
 bcrypt = Bcrypt()
@@ -48,6 +48,8 @@ class Likes(db.Model):
         unique=True
     )
 
+    message = db.relationship('Message', backref='likes', overlaps="likes")
+    
 
 class User(db.Model):
     """User in the system."""
@@ -57,18 +59,19 @@ class User(db.Model):
     id = db.Column(
         db.Integer,
         primary_key=True,
+        autoincrement=True
     )
 
     email = db.Column(
         db.Text,
         nullable=False,
-        unique=True,
+        unique=True
     )
 
     username = db.Column(
         db.Text,
         nullable=False,
-        unique=True,
+        unique=True
     )
 
     image_url = db.Column(
@@ -82,37 +85,40 @@ class User(db.Model):
     )
 
     bio = db.Column(
-        db.Text,
+        db.Text
     )
 
     location = db.Column(
-        db.Text,
+        db.Text
     )
 
     password = db.Column(
         db.Text,
-        nullable=False,
+        nullable=False
     )
 
-    messages = db.relationship('Message')
+    messages = db.relationship('Message', back_populates='user')
 
     followers = db.relationship(
         "User",
         secondary="follows",
         primaryjoin=(Follows.user_being_followed_id == id),
-        secondaryjoin=(Follows.user_following_id == id)
+        secondaryjoin=(Follows.user_following_id == id),
+        overlaps="following"
     )
 
     following = db.relationship(
         "User",
         secondary="follows",
         primaryjoin=(Follows.user_following_id == id),
-        secondaryjoin=(Follows.user_being_followed_id == id)
+        secondaryjoin=(Follows.user_being_followed_id == id),
+        overlaps="followers"
     )
 
     likes = db.relationship(
         'Message',
-        secondary="likes"
+        secondary="likes",
+        overlaps="likes"
     )
 
     def __repr__(self):
@@ -121,14 +127,15 @@ class User(db.Model):
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 
-        found_user_list = [user for user in self.followers if user == other_user]
-        return len(found_user_list) == 1
+        return other_user in self.followers
 
     def is_following(self, other_user):
         """Is this user following `other_use`?"""
 
-        found_user_list = [user for user in self.following if user == other_user]
-        return len(found_user_list) == 1
+        return other_user in self.following
+    
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
     @classmethod
     def signup(cls, username, email, password, image_url):
@@ -136,6 +143,9 @@ class User(db.Model):
 
         Hashes password and adds user to system.
         """
+
+        if not username or not email or not password:
+            raise ValueError("Username, email, and password required.")
 
         hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
@@ -162,10 +172,8 @@ class User(db.Model):
 
         user = cls.query.filter_by(username=username).first()
 
-        if user:
-            is_auth = bcrypt.check_password_hash(user.password, password)
-            if is_auth:
-                return user
+        if user and bcrypt.check_password_hash(user.password, password):
+            return user
 
         return False
 
@@ -188,7 +196,7 @@ class Message(db.Model):
     timestamp = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow(),
+        default=datetime.now(timezone.utc),
     )
 
     user_id = db.Column(
@@ -197,7 +205,14 @@ class Message(db.Model):
         nullable=False,
     )
 
-    user = db.relationship('User')
+    user = db.relationship('User', back_populates='messages')
+
+    # likes = db.relationship(
+    #     'Likes',
+    #     backref='message',
+    #     cascade='all, delete-orphan',
+    #     passive_deletes=True
+    # )
 
 
 def connect_db(app):

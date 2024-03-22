@@ -1,0 +1,31 @@
+{% extends 'users/detail.html' %}
+
+{% block user_details %}
+
+<div class="col-md-9">
+    <div class="row">
+        {% if messages %}
+            <ul class="list-group">
+                {% for message in messages %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p>{{ message.text }}</p>
+                                <small>Posted by: <a href="{{ url_for('messages_show', message_id=message.id) }}">{{ message.user.username }} on {{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</a></small>
+                            </div>
+                            <form action="{{ url_for('remove_like', message_id=message.id) }}" method="post">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Remove
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No liked messages found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

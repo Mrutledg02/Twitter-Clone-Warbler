@@ -301,6 +301,8 @@ nav + .container {
   color: #657786;
 }
 
+
+
 /* ==================== User cards on follower/following pages */
 
 .user-card {
@@ -541,3 +543,4 @@ p.card-bio {
 .message-404 .form-inline input {
   flex: 1;
 }
+

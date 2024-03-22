@@ -52,11 +52,7 @@
               <p>{{ msg.text }}</p>
             </div>
             <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form">
-              <button class="
-                btn 
-                btn-sm 
-                {{'btn-primary' if msg.id in likes else 'btn-secondary'}}"
-              >
+              <button class="btn btn-sm {% if msg.id in liked_message %}btn-secondary{% else %}btn-primary{% endif %}">
                 <i class="fa fa-thumbs-up"></i> 
               </button>
             </form>
@@ -66,4 +62,7 @@
     </div>
 
   </div>
+
+  
+  
 {% endblock %}

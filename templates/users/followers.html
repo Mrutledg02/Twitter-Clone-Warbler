@@ -19,8 +19,7 @@
                 </a>
 
                 {% if g.user.is_following(follower) %}
-                  <form method="POST"
-                        action="/users/stop-following/{{ follower.id }}">
+                  <form method="POST" action="/users/stop-following/{{ follower.id }}">
                     <button class="btn btn-primary btn-sm">Unfollow</button>
                   </form>
                 {% else %}
@@ -29,8 +28,8 @@
                   </form>
                 {% endif %}
 
-              </div>
-              <p class="card-bio">BIO HERE</p>
+             </div>
+              <p class="card-bio">{{ follower.bio }}</p> <!-- Display user's bio here -->
             </div>
           </div>
         </div>
