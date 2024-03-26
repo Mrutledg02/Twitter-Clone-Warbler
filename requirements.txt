@@ -5,6 +5,8 @@ blinker==1.7.0
 cffi==1.14.2
 click==8.1.7
 decorator==4.3.0
+dnspython==2.6.1
+email_validator==2.1.1
 Faker==0.9.1
 Flask==3.0.2
 Flask-Bcrypt==1.0.1
@@ -12,6 +14,7 @@ Flask-DebugToolbar==0.14.1
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 greenlet==3.0.3
+idna==3.6
 ipython==7.0.1
 ipython-genutils==0.2.0
 itsdangerous==2.1.2
@@ -36,4 +39,4 @@ traitlets==4.3.2
 typing_extensions==4.10.0
 wcwidth==0.1.7
 Werkzeug==3.0.1
-WTForms==2.2.1
+WTForms==3.1.2
