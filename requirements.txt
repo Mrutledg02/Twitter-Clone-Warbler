@@ -5,7 +5,7 @@ blinker==1.6.3
 cffi==1.14.2
 click==8.1.7
 decorator==4.3.0
-dnspython==2.6.1
+dnspython==2.3.0
 email_validator==2.1.1
 Faker==0.9.1
 Flask==3.0.2
