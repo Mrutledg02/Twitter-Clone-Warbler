@@ -8,7 +8,7 @@ from unittest import TestCase
 from app import app, db, User, Message, CURR_USER_KEY  # Import CURR_USER_KEY from app.py
 
 # Make sure to use a different database for testing
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///view-test"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler-tet"
 
 # Disable CSRF protection in Flask-WTF forms during testing
 app.config['WTF_CSRF_ENABLED'] = False
