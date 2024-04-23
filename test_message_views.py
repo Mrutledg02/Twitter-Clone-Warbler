@@ -1,3 +1,5 @@
+# When writing tests, it's important to test both the expected behavior and edge cases. For example, what happens when a user tries to like their own message?
+
 """Message View tests."""
 
 # run these tests like:

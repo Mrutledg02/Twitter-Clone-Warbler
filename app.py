@@ -1,3 +1,6 @@
+# Consider using Flask's url_for function to generate URLs in your templates. This can help avoid hardcoding URLs and make your application easier to maintain.
+# It's good practice to handle the case where a database query returns None in your routes. This can happen if an ID does not exist in the database. You can use get_or_404 to simplify this process.
+
 import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g

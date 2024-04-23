@@ -1,3 +1,5 @@
+# In your User model, the is_following and is_followed_by methods can be optimized by using direct database queries instead of loading all followers or following into memory.
+
 """SQLAlchemy models for Warbler."""
 
 from datetime import datetime, timezone

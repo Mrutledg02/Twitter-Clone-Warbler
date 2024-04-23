@@ -1,3 +1,5 @@
+# In your forms, consider adding more validators to ensure the data integrity. For example, you could add a Regexp validator to ensure that usernames follow a certain pattern.
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length
